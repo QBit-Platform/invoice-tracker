@@ -3,58 +3,89 @@ body {
     background-color: #f4f7f9;
     color: #333;
     margin: 0;
-    padding: 20px;
+    padding: 10px;
 }
-
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     background-color: #fff;
-    padding: 2rem;
+    padding: 1rem 2rem;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
-
-h1, h2 {
-    text-align: center;
-    color: #2c3e50;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
 }
+#logout-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+/* --- تصميم الفلاتر --- */
+.filter-container {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid #e0e0e0;
+}
+.filter-container h3 { margin-top: 0; }
+#filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+}
+.filter-item { display: flex; flex-direction: column; }
+.filter-item label { margin-bottom: 5px; font-size: 0.9rem; color: #555; }
+.filter-item select, .filter-item input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 180px;
+}
+.filter-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+#apply-filter-btn { background-color: #007bff; color: white; }
+#reset-filter-btn { background-color: #6c757d; color: white; }
 
-/* --- تصميم الخريطة --- */
+/* --- تصميم الخريطة (تمت إضافة التعديل هنا) --- */
 #map {
-    height: 500px; /* هذا السطر مهم جدًا لظهور الخريطة */
+    height: 500px;
     width: 100%;
     border-radius: 8px;
     margin-bottom: 2rem;
-    border: 1px solid #ddd;
+    position: relative; /* ضروري لعمل z-index بشكل صحيح */
+    z-index: 0;         /* <-- هذا هو السطر المهم الذي يحل المشكلة */
 }
 
 /* --- تصميم الجدول --- */
-.table-container {
-    overflow-x: auto; /* للسماح بالتمرير الأفقي على الشاشات الصغيرة */
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
 }
-
 th, td {
     padding: 12px 15px;
     border: 1px solid #e0e0e0;
     text-align: right;
 }
+thead tr { background-color: #007bff; color: #ffffff; }
+tbody tr:nth-child(even) { background-color: #f8f9fa; }
+tbody tr:hover { background-color: #e9ecef; cursor: pointer; }
 
-thead tr {
-    background-color: #007bff;
-    color: #ffffff;
-}
-
-tbody tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-tbody tr:hover {
-    background-color: #e9ecef;
+@media (max-width: 768px) {
+    #filter-form { flex-direction: column; align-items: stretch; gap: 1rem; }
 }

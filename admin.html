@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - فواتير المناديب</title>
+
+    <!-- استيراد مكتبة الخرائط Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+    <!-- استيراد ملف التصميم الخاص بصفحة الأدمن -->
+    <link rel="stylesheet" href="admin-style.css">
+
+    <!-- استيراد خط Cairo لتحسين المظهر -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container">
+        <h1>لوحة تحكم الفواتير</h1>
+        
+        <!-- قسم الخريطة -->
+        <h2>مواقع تسجيل الفواتير</h2>
+        <div id="map"></div>
+
+        <!-- قسم جدول البيانات -->
+        <h2>سجل الفواتير</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم الفاتورة</th>
+                        <th>خط العرض</th>
+                        <th>خط الطول</th>
+                        <th>وقت التسجيل</th>
+                    </tr>
+                </thead>
+                <tbody id="invoices-table-body">
+                    <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- استيراد مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- استيراد مكتبة الخرائط Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+    <!-- استيراد ملف الجافاسكريبت الخاص بصفحة الأدمن -->
+    <script src="admin.js"></script>
+
+</body>
+</html>

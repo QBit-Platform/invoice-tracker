@@ -1,0 +1,60 @@
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+h1, h2 {
+    text-align: center;
+    color: #2c3e50;
+}
+
+/* --- تصميم الخريطة --- */
+#map {
+    height: 500px; /* هذا السطر مهم جدًا لظهور الخريطة */
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid #ddd;
+}
+
+/* --- تصميم الجدول --- */
+.table-container {
+    overflow-x: auto; /* للسماح بالتمرير الأفقي على الشاشات الصغيرة */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    text-align: right;
+}
+
+thead tr {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+    background-color: #e9ecef;
+}

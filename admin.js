@@ -1,64 +1,88 @@
-// --- الإعدادات ---
-// استبدل بالبيانات الخاصة بمشروعك في Supabase
-const SUPABASE_URL = 'https://nvfreqhmeprztpahfnft.supabase.co'; // الصق رابط المشروع هنا
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52ZnJlcWhtZXByenRwYWhmbmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Njc1NTgsImV4cCI6MjA4MDM0MzU1OH0.pV9Ud-wltZJjryISJgqQRGfQU3X1frYTrrHJr5ymj4Y'; // الصق مفتاح anon public هنا
-
-// --- الاتصال بـ Supabase ---
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// --- عناصر واجهة المستخدم ---
-const tableBody = document.getElementById('invoices-table-body');
-const mapElement = document.getElementById('map');
-
-// --- تهيئة الخريطة ---
-// ضع إحداثيات لمركز الخريطة (مثلاً، القاهرة) ومستوى التقريب
+const tableBody = document.getElementById('entries-table-body');
+const userFilter = document.getElementById('user-filter');
+const filterForm = document.getElementById('filter-form');
+const logoutButton = document.getElementById('logout-button');
 const map = L.map('map').setView([30.0444, 31.2357], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+const routeLayer = L.layerGroup().addTo(map);
 
-// إضافة طبقة الخريطة الأساسية من OpenStreetMap
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
-
-
-// --- الوظيفة الرئيسية لجلب وعرض البيانات ---
-async function fetchAndDisplayInvoices() {
-    // 1. جلب البيانات من جدول 'invoices'
-    const { data: invoices, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('created_at', { ascending: false }); // ترتيبها من الأحدث للأقدم
-
-    // 2. التعامل مع الأخطاء إن وجدت
-    if (error) {
-        console.error('خطأ في جلب البيانات:', error);
-        tableBody.innerHTML = `<tr><td colspan="4">فشل في تحميل البيانات.</td></tr>`;
-        return;
-    }
-
-    // 3. مسح البيانات القديمة من الجدول قبل إضافة الجديدة
-    tableBody.innerHTML = '';
-
-    // 4. المرور على كل فاتورة وعرضها في الجدول وعلى الخريطة
-    invoices.forEach(invoice => {
-        // --- إضافة صف جديد في الجدول ---
-        const tableRow = `
-            <tr>
-                <td>${invoice.invoice_number}</td>
-                <td>${invoice.latitude}</td>
-                <td>${invoice.longitude}</td>
-                <td>${new Date(invoice.created_at).toLocaleString('ar-EG')}</td>
-            </tr>
-        `;
-        tableBody.innerHTML += tableRow;
-
-        // --- إضافة علامة (Marker) على الخريطة ---
-        if (invoice.latitude && invoice.longitude) {
-            const marker = L.marker([invoice.latitude, invoice.longitude]).addTo(map);
-            // إضافة نافذة منبثقة تظهر عند الضغط على العلامة
-            marker.bindPopup(`<b>رقم الفاتورة: ${invoice.invoice_number}</b>`);
-        }
+async function handleLogout() {
+    await supabase.auth.signOut();
+    window.location.href = './login.html';
+}
+async function populateUserFilter() {
+    const { data: profiles, error } = await supabase.from('profiles').select('id, full_name').eq('role', 'مندوب');
+    if (error) return;
+    profiles.forEach(profile => {
+        const option = document.createElement('option');
+        option.value = profile.id;
+        option.textContent = profile.full_name;
+        userFilter.appendChild(option);
     });
 }
+async function fetchAndDisplayEntries() {
+    tableBody.innerHTML = '';
+    routeLayer.clearLayers();
+    let query = supabase.from('entries').select('*, profiles(full_name)');
+    if (userFilter.value) query = query.eq('user_id', userFilter.value);
+    const typeFilter = document.getElementById('type-filter').value;
+    if (typeFilter) query = query.eq('entry_type', typeFilter);
+    const startDate = document.getElementById('start-date-filter').value;
+    if (startDate) query = query.gte('created_at', startDate);
+    const endDate = document.getElementById('end-date-filter').value;
+    if (endDate) query = query.lte('created_at', `${endDate}T23:59:59`);
+    query = query.order('created_at', { ascending: true });
+    const { data: entries, error } = await query;
+    if (error) {
+        console.error('خطأ في جلب البيانات:', error);
+        return;
+    }
+    const routeCoordinates = [];
+    entries.forEach(entry => {
+        const rowHTML = `<tr data-lat="${entry.latitude}" data-lng="${entry.longitude}">
+            <td>${entry.profiles?.full_name || 'غير معروف'}</td>
+            <td>${entry.entry_type === 'invoice' ? 'فاتورة' : 'وقود'}</td>
+            <td>${entry.entry_value}</td>
+            <td>${new Date(entry.created_at).toLocaleString('ar-EG')}</td>
+        </tr>`;
+        tableBody.insertAdjacentHTML('afterbegin', rowHTML);
+        if (entry.latitude && entry.longitude) {
+            const marker = L.marker([entry.latitude, entry.longitude]).addTo(routeLayer);
+            marker.bindPopup(`<b>${entry.profiles?.full_name}</b><br>${entry.entry_type === 'invoice' ? 'فاتورة رقم: ' : 'عداد: '}${entry.entry_value}`);
+            routeCoordinates.push([entry.latitude, entry.longitude]);
+        }
+    });
+    if (userFilter.value && routeCoordinates.length > 1) {
+        const polyline = L.polyline(routeCoordinates, { color: '#dc3545', weight: 5 }).addTo(routeLayer);
+        L.polylineDecorator(polyline, {
+            patterns: [{
+                offset: '10%',
+                repeat: '80px',
+                symbol: L.Symbol.arrowHead({ pixelSize: 15, pathOptions: { fillOpacity: 1, weight: 0, color: '#dc3545' } })
+            }]
+        }).addTo(routeLayer);
+        map.fitBounds(polyline.getBounds().pad(0.1));
+    }
+}
 
-// --- تشغيل الوظيفة عند تحميل الصفحة ---
-document.addEventListener('DOMContentLoaded', fetchAndDisplayInvoices);
+document.addEventListener('DOMContentLoaded', () => {
+    populateUserFilter();
+    fetchAndDisplayEntries();
+});
+filterForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    fetchAndDisplayEntries();
+});
+filterForm.addEventListener('reset', () => {
+    setTimeout(fetchAndDisplayEntries, 0);
+});
+logoutButton.addEventListener('click', handleLogout);
+tableBody.addEventListener('click', (e) => {
+    const row = e.target.closest('tr');
+    if (!row) return;
+    const lat = row.dataset.lat;
+    const lng = row.dataset.lng;
+    if (lat && lng) {
+        map.flyTo([lat, lng], 15);
+    }
+});

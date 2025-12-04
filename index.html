@@ -1,32 +1,100 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل فاتورة</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+// --- الإعدادات ---
+const SUPABASE_URL = 'Your_Supabase_Project_URL';
+const SUPABASE_ANON_KEY = 'Your_Supabase_Anon_Key';
 
-    <div class="container">
-        <div class="card">
-            <h2>تسجيل الفاتورة</h2>
-            <p>أدخل رقم الفاتورة واضغط إرسال.</p>
-            <form id="invoiceForm">
-                <input type="text" id="invoiceNumber" placeholder="رقم الفاتورة" required>
-                <button type="submit" id="submitButton" disabled>
-                    <span id="button-text">انتظر تحديد الموقع...</span>
-                    <div class="spinner" id="spinner" style="display: none;"></div>
-                </button>
-            </form>
-            <p id="status" class="status-message"></p>
-        </div>
-    </div>
+// --- الاتصال بـ Supabase ---
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <!-- استيراد مكتبة Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- استيراد ملف الجافاسكريبت الخاص بنا -->
-    <script src="app.js"></script>
+// --- عناصر الصفحة ---
+const form = document.getElementById('invoiceForm');
+const invoiceInput = document.getElementById('invoiceNumber');
+const submitButton = document.getElementById('submitButton');
+const statusMsg = document.getElementById('status');
+const buttonText = document.getElementById('button-text');
+const spinner = document.getElementById('spinner');
 
-</body>
-</html>
+let currentLocation = null;
+
+// --- الوظائف ---
+
+function updateUI(message, type, isButtonEnabled) {
+    statusMsg.textContent = message;
+    statusMsg.className = `status-message ${type}`;
+    submitButton.disabled = !isButtonEnabled;
+    buttonText.textContent = isButtonEnabled ? 'إرسال' : 'انتظر تحديد الموقع...';
+}
+
+function showLoading(isLoading) {
+    spinner.style.display = isLoading ? 'block' : 'none';
+    buttonText.textContent = isLoading ? '' : 'إرسال';
+    submitButton.disabled = isLoading;
+}
+
+// *** دالة جديدة ومحسّنة للتعامل مع أخطاء الموقع ***
+function handleLocationError(error) {
+    let message = '';
+    switch (error.code) {
+        case error.PERMISSION_DENIED:
+            message = "تم رفض الإذن. يرجى تفعيل الموقع للمتصفح.";
+            break;
+        case error.POSITION_UNAVAILABLE:
+            message = "تعذر تحديد الموقع. حاول مرة أخرى.";
+            break;
+        case error.TIMEOUT:
+            message = "انتهت مهلة الطلب. يرجى تحديث الصفحة.";
+            break;
+        default:
+            message = "حدث خطأ غير معروف في تحديد الموقع.";
+            break;
+    }
+    updateUI(message, 'error', false);
+}
+
+function getLocation() {
+    if (!navigator.geolocation) {
+        updateUI('المتصفح لا يدعم تحديد الموقع.', 'error', false);
+        return;
+    }
+
+    // تم إضافة دالة التعامل مع الخطأ هنا
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            currentLocation = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            };
+            updateUI('تم تحديد الموقع بنجاح.', 'success', true);
+        },
+        handleLocationError // <-- هذا هو التعديل المهم
+    );
+}
+
+async function submitInvoice(event) {
+    event.preventDefault();
+    const invoiceValue = invoiceInput.value.trim();
+    if (!invoiceValue || !currentLocation) {
+        updateUI('يرجى إدخال رقم الفاتورة وتفعيل الموقع.', 'error', true);
+        return;
+    }
+    showLoading(true);
+    const { error } = await supabase.from('invoices').insert({
+        invoice_number: invoiceValue,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude
+    });
+    showLoading(false);
+    if (error) {
+        updateUI('فشل الإرسال. حاول مرة أخرى.', 'error', true);
+    } else {
+        updateUI('تم إرسال الفاتورة بنجاح!', 'success', false); // تعطيل الزر بعد النجاح
+        form.reset();
+        setTimeout(() => {
+            updateUI('جارٍ تحديث الموقع للإرسال التالي...', '', false);
+            getLocation();
+        }, 2000);
+    }
+}
+
+// --- ربط الأحداث ---
+window.addEventListener('load', getLocation);
+form.addEventListener('submit', submitInvoice);

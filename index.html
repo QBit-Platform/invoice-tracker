@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة المندوب - Nop</title>
     
-    <!-- ملفات الحماية والمكتبات الأساسية -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="auth-guard.js"></script>
+    <script src="supabase-client.js"></script> <!-- تحميل الملف المركزي -->
+    <script src="auth-guard.js"></script> <!-- ثم ملف الحماية -->
     
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
@@ -15,28 +15,17 @@
 <body>
     <div class="container">
         <div class="card">
-            <!-- قسم الترحيب بالمستخدم -->
             <div id="welcome-section">
                 <h2 id="welcome-message">مرحباً بك...</h2>
                 <button id="logout-button">تسجيل الخروج</button>
             </div>
             <hr>
-
-            <!-- قسم الحالة وتحديد الموقع -->
             <p id="status" class="status-message">جارٍ تحديد الموقع...</p>
-
-            <!-- قسم الاختيارات (يظهر بعد تحديد الموقع) -->
             <div id="choices-section" class="hidden">
                 <p>الرجاء اختيار نوع العملية:</p>
-                <button class="choice-button" id="invoice-choice-btn">
-                    <span class="icon">📄</span> تسجيل فاتورة
-                </button>
-                <button class="choice-button" id="fuel-choice-btn">
-                    <span class="icon">⛽</span> تسجيل وقود
-                </button>
+                <button class="choice-button" id="invoice-choice-btn"><span class="icon">📄</span> تسجيل فاتورة</button>
+                <button class="choice-button" id="fuel-choice-btn"><span class="icon">⛽</span> تسجيل وقود</button>
             </div>
-
-            <!-- قسم نموذج الإدخال (يظهر بعد الاختيار) -->
             <div id="form-section" class="hidden">
                 <form id="entryForm">
                     <input type="text" id="entryValue" placeholder="" required>

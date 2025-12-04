@@ -3,59 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - فواتير المناديب</title>
+    <title>لوحة التحكم - Nop</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script> <!-- تحميل الملف المركزي -->
+    <script src="auth-guard.js"></script> <!-- ثم ملف الحماية -->
 
-    <!-- استيراد مكتبة الخرائط Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-
-    <!-- استيراد ملف التصميم الخاص بصفحة الأدمن -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="admin-style.css">
-
-    <!-- استيراد خط Cairo لتحسين المظهر -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
     <div class="container">
-        <h1>لوحة تحكم الفواتير</h1>
-        
-        <!-- قسم الخريطة -->
-        <h2>مواقع تسجيل الفواتير</h2>
+        <header>
+            <h1>لوحة تحكم Nop</h1>
+            <button id="logout-button">تسجيل الخروج</button>
+        </header>
+        <div class="filter-container">
+            <h3>فلترة النتائج</h3>
+            <form id="filter-form">
+                <div class="filter-item">
+                    <label for="user-filter">المندوب:</label>
+                    <select id="user-filter"><option value="">كل المناديب</option></select>
+                </div>
+                <div class="filter-item">
+                    <label for="type-filter">نوع العملية:</label>
+                    <select id="type-filter">
+                        <option value="">الكل</option>
+                        <option value="invoice">فواتير فقط</option>
+                        <option value="fuel">وقود فقط</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="start-date-filter">من تاريخ:</label>
+                    <input type="date" id="start-date-filter">
+                </div>
+                <div class="filter-item">
+                    <label for="end-date-filter">إلى تاريخ:</label>
+                    <input type="date" id="end-date-filter">
+                </div>
+                <div class="filter-buttons">
+                    <button type="submit" id="apply-filter-btn">تطبيق</button>
+                    <button type="reset" id="reset-filter-btn">إعادة تعيين</button>
+                </div>
+            </form>
+        </div>
         <div id="map"></div>
-
-        <!-- قسم جدول البيانات -->
-        <h2>سجل الفواتير</h2>
         <div class="table-container">
+            <h2>سجل الإدخالات</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>رقم الفاتورة</th>
-                        <th>خط العرض</th>
-                        <th>خط الطول</th>
+                        <th>المندوب</th>
+                        <th>نوع الإدخال</th>
+                        <th>القيمة</th>
                         <th>وقت التسجيل</th>
                     </tr>
                 </thead>
-                <tbody id="invoices-table-body">
-                    <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
-                </tbody>
+                <tbody id="entries-table-body"></tbody>
             </table>
         </div>
     </div>
-
-    <!-- استيراد مكتبة Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- استيراد مكتبة الخرائط Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-
-    <!-- استيراد ملف الجافاسكريبت الخاص بصفحة الأدمن -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
     <script src="admin.js"></script>
-
 </body>
 </html>

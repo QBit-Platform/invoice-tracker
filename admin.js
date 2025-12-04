@@ -23,7 +23,13 @@ async function populateUserFilter() {
 async function fetchAndDisplayEntries() {
     tableBody.innerHTML = '';
     routeLayer.clearLayers();
-    let query = supabase.from('entries').select('*, profiles(full_name)');
+    
+    // --- هذا هو السطر الذي تم تصحيحه ---
+    // قمنا بتغيير '*, profiles(full_name)' إلى '*, profiles:user_id(full_name)'
+    // هذا يخبر Supabase صراحةً باستخدام عمود user_id للربط
+    let query = supabase.from('entries').select('*, profiles:user_id(full_name)');
+    // ------------------------------------
+
     if (userFilter.value) query = query.eq('user_id', userFilter.value);
     const typeFilter = document.getElementById('type-filter').value;
     if (typeFilter) query = query.eq('entry_type', typeFilter);
@@ -62,6 +68,9 @@ async function fetchAndDisplayEntries() {
             }]
         }).addTo(routeLayer);
         map.fitBounds(polyline.getBounds().pad(0.1));
+    } else if (routeCoordinates.length > 0) {
+        // إذا كانت هناك نقاط ولكن ليست مسارًا، قم بتقريب الخريطة لتناسب جميع النقاط
+        map.fitBounds(L.latLngBounds(routeCoordinates).pad(0.1));
     }
 }
 

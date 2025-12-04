@@ -1,5 +1,5 @@
 body {
-    font-family: 'Cairo', sans-serif; /* خط عربي جميل */
+    font-family: 'Cairo', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -37,7 +37,7 @@ input[type="text"] {
     margin-bottom: 1.5rem;
     border: 1px solid #ddd;
     border-radius: 8px;
-    box-sizing: border-box; /* يمنع تغيير حجم العنصر بسبب الحواف */
+    box-sizing: border-box;
     text-align: center;
     font-size: 1rem;
 }
@@ -56,6 +56,8 @@ button {
     justify-content: center;
     align-items: center;
     transition: background-color 0.3s;
+    position: relative; /* لإظهار Spinner بشكل صحيح */
+    height: 48px; /* تحديد ارتفاع ثابت للزر */
 }
 
 button:disabled {
@@ -71,6 +73,7 @@ button:not(:disabled):hover {
     margin-top: 1rem;
     font-size: 0.9rem;
     height: 20px;
+    font-weight: bold;
 }
 
 .status-message.success {
@@ -81,7 +84,6 @@ button:not(:disabled):hover {
     color: #dc3545;
 }
 
-/* Spinner for loading animation */
 .spinner {
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
